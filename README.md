@@ -53,3 +53,10 @@ or modify the code so that it uses new/delete.
 ## Performance sample
 
 ![Performance on Fugaku. N is the number of elements, Sort time is in second](fugaku.jpg)
+
+Measured on Fugaku using sorttest.cpp. N is the number of
+elements. Sort time is in second. The dashed curve with filled
+triangles is the time for std::sort. Filled squres, pentagons,
+open triangles, squres and pentagons are the results of
+samplesort_bodies called with 2, 4,  12,
+24, 48 threads.
