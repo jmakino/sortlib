@@ -63,6 +63,7 @@ int main(int argc, char** argv)
     auto bodies = new Body[n];
     auto b2 = new Body[n];
     auto b3 = new Body[n];
+    auto b4 = new Body[n];
     for (auto i=0; i<n; i++){
 	bodies[i].id=i;
 	for (auto k=0;k<3; k++) bodies[i].pos[k]= dist1(mt);
@@ -73,22 +74,31 @@ int main(int argc, char** argv)
     for (auto i=0; i<n; i++){
 	b2[i]=bodies[i];
 	b3[i]=bodies[i];
+	b4[i]=bodies[i];
     }
     auto t0=SampleSortLib::GetWtime();
     SampleSortLib::sort_bodies(bodies, n);
     auto t1=SampleSortLib::GetWtime();
-    SampleSortLib::samplesort_bodies(b2, n);
+    SampleSortLib::samplesort_bodies(b2, n,
+				     [](Body & l)
+				     ->auto{return l.pos[0];} );
     auto t2a=SampleSortLib::GetWtime();
-    SampleSortLib::sort_bodies(b2, n);
+    SampleSortLib::sort_bodies(b4, n,
+			       [](Body & l, Body & r )
+			       ->bool{return l.getsortkey()
+				       < r.getsortkey();} );
     auto t2=SampleSortLib::GetWtime();
     SampleSortLib::samplesort_bodies(b3, n);
+    //				     [](Body & l)
+    //				     ->auto{return l.pos[0];} );
     auto t3=SampleSortLib::GetWtime();
     printf("Time to sort = %g %g %g\n", t1-t0, t2a-t1, t3-t2);
     bool ok=true;
     for (auto i=0; i<n; i++){
 	// printf("%d  %ld %ld, %g %g\n",i,  bodies[i].id, b3[i].id,
 	//        bodies[i].pos[0], b3[i].pos[0]);
-	if (bodies[i].id != b3[i].id){
+	if (bodies[i].id != b3[i].id ||
+	    bodies[i].id != b4[i].id   ){
 	    ok=false;
 	    printf("ERROR at:%d  %ld %ldg\n",i,  bodies[i].id, b3[i].id);
 	}

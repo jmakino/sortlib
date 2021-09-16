@@ -37,16 +37,25 @@ public:
 };
     
     
-template<class T>
-void sort_bodies(T * b,
-		 int n)
-{
+    template<class T>
+    void sort_bodies(T * b,
+		     int n)
+    {
+	
+	std::sort(b, b+n, 
+		  [](T & l, T & r )
+		  ->bool{return l.getsortkey() < r.getsortkey();} );
+    }
     
-    std::sort(b, b+n, 
-	      [](T & l, T & r )
-	      ->bool{return l.getsortkey() < r.getsortkey();} );
-}
-
+    template<class T, class Compare>
+    void sort_bodies(T * b,
+		     int n,
+		     Compare c)
+    {
+	
+	std::sort(b, b+n, c);
+    }
+    
 
 void showdt(const char *s,
 	      bool initialize=false)
@@ -61,15 +70,33 @@ void showdt(const char *s,
 #endif    
 }	       
 
+    template<class T, class GetKey>
+    bool compare(T &a, T& b, GetKey getkey)
+    {
+	return getkey(a)<getkey(b);
+    }
+    
 
 const int randomize_offset = 48271;    
-template<class T>
-void samplesort_bodies(T * b,
-		       int n)
+
+    template<class T, class GetKey>
+    void samplesort_bodies(T * b,
+		       int n,
+		       GetKey getkey)
 {
+    
     showdt("", true);
     auto nt = omp_get_max_threads();
     //    auto nt = 4;
+    if (n < nt*nt){
+	//	printf("single thread sort called\n");
+	// n too small for parallization. Call single-thread sort
+		std::sort(b,b+n,
+			  [&](T & l, T & r )
+			  ->bool{return compare(l,r, getkey);} );
+
+	return;
+    }
     auto nwork0= (n+nt-1)/nt;
     auto nsample= nwork0/nt/10;
     if (nsample < 2) nsample = 2;
@@ -111,7 +138,7 @@ void samplesort_bodies(T * b,
 	//	printf("sort size=%d %d\n", myrange,it);
 	for(auto i=0;i<myrange; i++){
 	    key[it][i].key =i+mystartlocal;
-	    key[it][i].value =b[i+mystartlocal].getsortkey();
+	    key[it][i].value =getkey(b[i+mystartlocal]);
 	}
 	//	sort_bodies(b+mystartlocal, myrange);
 	if (it==0) showdt("Key made");
@@ -260,7 +287,13 @@ void samplesort_bodies(T * b,
     }
     showdt(" Copyback");
 }
-
+    template<class T>
+    void samplesort_bodies(T * b,
+			   int n)
+    {
+	samplesort_bodies( b, n,
+			   [&](T & l) ->auto{return l.getsortkey();} );
+    }
 
 }
 

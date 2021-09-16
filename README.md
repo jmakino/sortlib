@@ -14,8 +14,8 @@ The last line before "success!" message would look like
 Time to sort = 1.3968e-05 0.000201143 5.41974e-05
 ```
 First number indicates the time for std:sort (single thread),
-and second and third both show the time for parallel sample sort,
-for first and second calls. Since the overhead of multithread
+and second and third both show the times for parallel sample sort,
+for the first and second calls. Since the overhead of multithread
 execution is the largest for the first call, I show the times for
 first and second calls.
 
@@ -29,16 +29,26 @@ first and second calls.
 Provide:
 ```
    template<class T>
-   void samplesort_bodies(T * b,
-		       int n)
+   void samplesort_bodies(T * b, int n)
+```
+and
+```
+   template<class T, class GetKey>
+   void samplesort_bodies(T * b, int n, GetKey getkey)
 ```
    in namespace SampleSortLib
 
-b is the pointer to array (could be vector?) of class T
+b is the pointer to array (could be vector?) of class T and
 n is the number of elements
 
-Class T should provide a member function getsortkey()
-using which this function sort the array.
+To use the first form, c lass T should provide a member function getsortkey()
+using which this function sort the array. In the second form the
+function to get the sort key is given as the third argument. For
+example, if we want to sort n elements of class B in stored in array a
+using the member variable x as key, we write
+```
+    SampleSortLib::samplesort_bodies(a, n,  [](B & b) ->auto{return b.x;} );
+```
 
 
 ## Limitations
