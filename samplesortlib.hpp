@@ -2,7 +2,22 @@
 //
 // a library for parallel sample sort
 //
-// usage: 
+// usage: #include "PATH/OF/THIS/FILE/samplesortlib.hpp"
+//
+//   Provide:
+//   template<class T>
+//   void samplesort_bodies(T * b,
+//		       int n)
+//   in namespace SampleSortLib
+//
+//  b is the pointer to array (could be vector?) of class T
+//  n is the number of elements
+//  Class T should provide a menber function getsortkey()
+//  using which this function sort the array.
+//
+//    Copyright   2021 Jun Makino
+// 
+
 namespace SampleSortLib{
     
     inline double GetWtime()
