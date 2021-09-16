@@ -49,3 +49,7 @@ number of threads.
 Assumes that the stack size is large enough to place working arrays
 (n*(sizeof(T)+32) bytes). Use ulimit -h (or limit stacksize in Csh),
 or modify the code so that it uses new/delete. 
+
+## Performance sample
+
+![Performance on Fugaku. N is the number of elements, Sort time is in second](fugaku.jpg)
