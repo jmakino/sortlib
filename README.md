@@ -45,3 +45,7 @@ using which this function sort the array.
 
 Can fail if the size of the array is smaller than the squre of the
 number of threads.
+
+Assumes that the stack size is large enough to place working arrays
+(n*(sizeof(T)+32) bytes). Use ulimit -h (or limit stacksize in Csh),
+or modify the code so that it uses new/delete. 
