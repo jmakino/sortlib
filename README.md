@@ -20,3 +20,7 @@ execution is the largest for the first call, I show the times for
 first and second calls.
 
 
+## Limitations
+
+Can fail if the size of the array is smaller than the squre of the
+number of threads.
