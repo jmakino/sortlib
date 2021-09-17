@@ -79,9 +79,10 @@ int main(int argc, char** argv)
     auto t0=SampleSortLib::GetWtime();
     SampleSortLib::sort_bodies(bodies, n);
     auto t1=SampleSortLib::GetWtime();
+    double dummy;
     SampleSortLib::samplesort_bodies(b2, n,
 				     [](Body & l)
-				     ->auto{return l.pos[0];} );
+				     ->auto{return l.pos[0];});
     auto t2a=SampleSortLib::GetWtime();
     SampleSortLib::sort_bodies(b4, n,
 			       [](Body & l, Body & r )
@@ -95,9 +96,7 @@ int main(int argc, char** argv)
     printf("Time to sort = %g %g %g\n", t1-t0, t2a-t1, t3-t2);
     bool ok=true;
     for (auto i=0; i<n; i++){
-	// printf("%d  %ld %ld, %g %g\n",i,  bodies[i].id, b3[i].id,
-	//        bodies[i].pos[0], b3[i].pos[0]);
-	if (bodies[i].id != b3[i].id ||
+	if (bodies[i].id != b2[i].id ||
 	    bodies[i].id != b4[i].id   ){
 	    ok=false;
 	    printf("ERROR at:%d  %ld %ldg\n",i,  bodies[i].id, b3[i].id);
