@@ -62,7 +62,13 @@ int main(int argc, char** argv)
     auto nend =nstart+1;
     if (argc > 2) nend= atoi(argv[2]);
     auto showtime = false;
-    if (argc > 3) showtime = (atoi(argv[3]) == 1);
+    if (argc > 3) {
+	showtime = (atoi(argv[3]) == 1);
+    }else if (argc <= 2){
+	showtime = true;
+    }
+		    
+		    
     
     auto bodies = new Body[nend];
     auto b2 = new Body[nend];

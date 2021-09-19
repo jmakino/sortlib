@@ -7,11 +7,13 @@ you can try this with
 
 ```
   make -f Makefile.sorttest sorttest
-  env OMP_NUM_THREADS=4 sorttest  120
+  env OMP_NUM_THREADS=4 sorttest  1500
 ```
-The last line before "success!" message would look like
+The output would look like
 ```
-Time to sort = 1.3968e-05 0.000201143 5.41974e-05
+Time to sort = 0.00029669 0.000591706 0.00015421
+Parallel sort success for n=1500 nthreads=4!
+Parallel sort success!
 ```
 First number indicates the time for std:sort (single thread),
 and second and third both show the times for parallel sample sort,
@@ -41,7 +43,7 @@ and
 b is the pointer to array (could be vector?) of class T and
 n is the number of elements
 
-To use the first form, c lass T should provide a member function getsortkey()
+To use the first form, class T should provide a member function getsortkey()
 using which this function sort te array. In the second form the
 function to get the sort key is given as the third argument. For
 example, if we want to sort n elements of class B in stored in array a
@@ -53,12 +55,14 @@ using the member variable x as key, we write
 
 ## Limitations
 
-Can fail if the size of the array is smaller than the square of the
-number of threads.
 
 Assumes that the stack size is large enough to place working arrays
 (n*(sizeof(T)+32) bytes). Use ulimit -h (or limit stacksize in Csh),
-or modify the code so that it uses new/delete. 
+or modify the code so that it uses new/delete.
+
+Switches from single-thread std::sort to parallel sort at
+size=1000. This might not be the optimum position to switch depending
+on architecture.
 
 ## Performance sample
 
