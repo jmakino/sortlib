@@ -42,7 +42,7 @@ b is the pointer to array (could be vector?) of class T and
 n is the number of elements
 
 To use the first form, c lass T should provide a member function getsortkey()
-using which this function sort the array. In the second form the
+using which this function sort te array. In the second form the
 function to get the sort key is given as the third argument. For
 example, if we want to sort n elements of class B in stored in array a
 using the member variable x as key, we write

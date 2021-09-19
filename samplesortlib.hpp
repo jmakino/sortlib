@@ -1,4 +1,5 @@
 #pragma once
+#include <unistd.h>
 //
 // a library for parallel sample sort
 //
@@ -55,7 +56,7 @@ namespace SampleSortLib{
 	std::sort(b, b+n, c);
     }
     
-
+    //#define SORTLIB_MEASURE_TIME
     void showdt(const char *s,
 		bool initialize=false)
     {
@@ -67,7 +68,8 @@ namespace SampleSortLib{
 	}
 	t0=GetWtime();
 #endif    
-    }	       
+    }
+
 
     template<class T, class GetKey>
     inline bool compare(T &a, T& b, GetKey getkey)
@@ -94,16 +96,20 @@ namespace SampleSortLib{
 	showdt("", true);
 	auto nt = omp_get_max_threads();
 	//    auto nt = 4;
-	if (n <2* nt*nt|| nt==1){
+	//	if (n < nt*5 || n < 2*nt*nt|| nt==1){
+	if (n < nt*5 || nt==1){
 	    //	printf("single thread sort called\n");
 	    // n too small for parallization. Call single-thread sort
 	    std::sort(b,b+n,
 		      [&](T & l, T & r )
 		      ->bool{return compare(l,r, getkey);} );
-
+	    
 	    return;
 	}
 	auto nwork0= (n+nt-1)/nt;
+	auto nworkm= n/nt;
+	auto nworkp= nworkm+1;
+	auto ntplus = n%nt;
 	auto nsample= nwork0/nt/10;
 	if (nsample < 2) nsample = 2;
 	auto nsampletotal = nsample * nt;
@@ -113,7 +119,7 @@ namespace SampleSortLib{
 	KeyValuePair key[nt][nwork0];
 	//    printf("nt=%d  nwork=%d nsample=%d \n", nt, nwork0, nsample);
 	int isrcstart[nt][nt+1];
-	int ndest[nt][nt];
+	int ndest[nt][nt+1];
 	int destsize[nt];
 	int deststart[nt];
 	auto maxdestsize=0;
@@ -121,13 +127,30 @@ namespace SampleSortLib{
 	{
 	    auto it=omp_get_thread_num();
 	    if (it==0) showdt("Enter parallel region");
+#if 0
 	    auto mystartdest = it*nsample;
 	    auto mystartlocal = it*nwork0;
 	    auto myendlocal =mystartlocal+nwork0;
 	    if (myendlocal > n) myendlocal=n;
+	    auto myrange = myendlocal - mystartlocal;
+#else
+	    auto mystartdest = it*nsample;
+	    int mystartlocal;
+	    int myrange;
+	    if (it < ntplus) {
+		mystartlocal = it*nworkp;
+		myrange=nworkp;
+	    }else{
+		mystartlocal = ntplus*nworkp + (it-ntplus)*nworkm;
+		myrange=nworkm;
+	    }
+	    
+	    auto myendlocal =mystartlocal + myrange;
+#endif	    
+	    //	    printf("it=%d  mystart=%d, myend=%d, myrange=%d\n",
+	    //	   it, mystartlocal, myendlocal,myrange );
 	    mystart[it]=mystartlocal;
 	    myend[it]=myendlocal;
-	    auto myrange = myendlocal - mystartlocal;
 	    auto myoffset = randomize_offset ;
 	    if (myoffset % myrange == 0 ||myrange % myoffset == 0){
 		myoffset ++;
@@ -140,6 +163,7 @@ namespace SampleSortLib{
 	    
 		samplearray[mystartdest+ilocal]= getkey(b[mystartlocal+myi]);
 	    }
+#pragma omp barrier	
 	    if (it==0) showdt("Sample made");
 	    //	printf("sort size=%d %d\n", myrange,it);
 	    for(auto i=0;i<myrange; i++){
@@ -153,7 +177,7 @@ namespace SampleSortLib{
 	    //	printf("sort end %d\n", it);
 	    if (it==0){
 		showdt("Intial sampling and internal sort");
-		//    printf("sample sort size=%d\n", nsampletotal);
+		//		printf("sample sort size=%d\n", nsampletotal);
 		std::sort(samplearray, samplearray+nsampletotal, 
 			  [](decltype(getkey(*b))  l, decltype(getkey(*b))  r )   ->bool{return l < r;} );
 		// for(auto i=0;i<nsampletotal; i+=nsample){

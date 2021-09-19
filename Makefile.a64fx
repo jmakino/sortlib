@@ -5,5 +5,8 @@
 #CPPFLAGS += -ffast-math    -ftree-vectorize  -fopt-info-vec-optimized=vector.txt
 CC = FCCpx -Nclang
 CPPFLAGS = -fopenmp  -Ofast 
+CFLAGS = -Nclang -fopenmp  -Ofast 
 CFLAGS += -Rpass=sve-loop-vectrizable
-
+mpitest: mpitest.c
+	 mpifccpx $(CFLAGS) -o $@ $<
+	 
