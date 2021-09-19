@@ -119,7 +119,6 @@ namespace SampleSortLib{
 	KeyValuePair key[nt][nwork0];
 	//    printf("nt=%d  nwork=%d nsample=%d \n", nt, nwork0, nsample);
 	int isrcstart[nt][nt+1];
-	int ndest[nt][nt+1];
 	int destsize[nt];
 	int deststart[nt];
 	auto maxdestsize=0;
