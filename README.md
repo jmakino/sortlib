@@ -21,6 +21,11 @@ for the first and second calls. Since the overhead of multithread
 execution is the largest for the first call, I show the times for
 first and second calls.
 
+This result is ontained  on Intel® Core™ i7-1065G7 with gcc version
+7.5.0 (Ubuntu 7.5.0-3ubuntu1~18.04).  
+
+
+
 ## Usage as header-only library
 
 ```

@@ -85,11 +85,11 @@ namespace SampleSortLib{
 		    int n,
 		    GetKey getkey)
     {
-    
+	typedef decltype(getkey(*b)) KeyType;
 	class KeyValuePair{
 	public:
 	    int64_t key;
-	    decltype(getkey(*b)) value;
+	    KeyType value;
 	    inline auto getsortkey() {return value;}    
 	};
     
@@ -113,7 +113,7 @@ namespace SampleSortLib{
 	auto nsample= nwork0/nt/10;
 	if (nsample < 2) nsample = 2;
 	auto nsampletotal = nsample * nt;
-	decltype(getkey(*b)) samplearray[nsampletotal];
+	KeyType samplearray[nsampletotal];
 	int mystart[nt];
 	int myend[nt];
 	KeyValuePair key[nt][nwork0];
@@ -178,7 +178,7 @@ namespace SampleSortLib{
 		showdt("Intial sampling and internal sort");
 		//		printf("sample sort size=%d\n", nsampletotal);
 		std::sort(samplearray, samplearray+nsampletotal, 
-			  [](decltype(getkey(*b))  l, decltype(getkey(*b))  r )   ->bool{return l < r;} );
+			  [](KeyType  l, KeyType  r )   ->bool{return l < r;} );
 		// for(auto i=0;i<nsampletotal; i+=nsample){
 		// 	printf("sample[%d]=%g\n", i, samplearray[i]);
 		// }
@@ -207,7 +207,7 @@ namespace SampleSortLib{
 	    for (auto itdest=1; itdest<nt; itdest++){
 		
 		// find the next start location using bisection
-		decltype(getkey(*b)) nextval = samplearray[itdest*nsample];
+		auto nextval = samplearray[itdest*nsample];
 		int start = isrcstart[it][itdest-1];
 		//	    if (bstart[start].getsortkey() < nextval) start ++;
 		int end = myrange-1;
