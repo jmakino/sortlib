@@ -81,9 +81,9 @@ namespace SampleSortLib{
     const int randomize_offset = 48271;    
 
     template<class T, class GetKey>
-    void samplesort_bodies(T * b,
-			   int n,
-			   GetKey getkey)
+    void samplesort(T * b,
+		    int n,
+		    GetKey getkey)
     {
     
 	class KeyValuePair{
@@ -317,12 +317,26 @@ namespace SampleSortLib{
 	showdt(" Copyback");
     }
     template<class T>
-    void samplesort_bodies(T * b,
-			   int n)
+    void samplesort(T * b,
+		    int n)
     {
-	samplesort_bodies( b, n,
-			   [&](T & l) ->auto{return l.getsortkey();});
+	samplesort( b, n,
+		    [&](T & l) ->auto{return l.getsortkey();});
     }
 
+    // old samplesort_bodies APIs for backward compatibility
+    template<class T, class GetKey>
+    void samplesort_bodies(T * b,
+			   int n,
+			   GetKey getkey)
+    {
+	samplesort(b, n, getkey);
+    }
+    template<class T>
+    void samplesort_bodies(T * b,
+		    int n)
+    {
+	samplesort(b, n);
+    }
 }
 

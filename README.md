@@ -31,12 +31,12 @@ first and second calls.
 Provide:
 ```
    template<class T>
-   void samplesort_bodies(T * b, int n)
+   void samplesort(T * b, int n)
 ```
 and
 ```
    template<class T, class GetKey>
-   void samplesort_bodies(T * b, int n, GetKey getkey)
+   void samplesort(T * b, int n, GetKey getkey)
 ```
    in namespace SampleSortLib
 
@@ -49,16 +49,18 @@ function to get the sort key is given as the third argument. For
 example, if we want to sort n elements of class B in stored in array a
 using the member variable x as key, we write
 ```
-    SampleSortLib::samplesort_bodies(a, n,  [](B & b) ->auto{return b.x;} );
+    SampleSortLib::samplesort(a, n,  [](B & b) ->auto{return b.x;} );
 ```
 
+The old name samplesort_bodies is kept for compatibility.
 
 ## Limitations
 
 
 Assumes that the stack size is large enough to place working arrays
 (n*(sizeof(T)+32) bytes). Use ulimit -h (or limit stacksize in Csh),
-or modify the code so that it uses new/delete.
+or modify the code so that it uses new/delete or other memory
+management schemes.
 
 Switches from single-thread std::sort to parallel sort at
 size=1000. This might not be the optimum position to switch depending
@@ -69,7 +71,7 @@ on architecture.
 ![Performance on Fugaku. N is the number of elements, Sort time is in second](fugaku.jpg)
 
 Measured on Fugaku using sorttest.cpp. N is the number of
-elements. Sort time is in second. The dashed curve with filled
+elements. Sort time is in seconds. The dashed curve with filled
 triangles is the time for std::sort. Filled squares, pentagons,
 open triangles, squares and pentagons are the results of
 samplesort_bodies called with 2, 4,  12,
