@@ -8,7 +8,3 @@ testsort: sorttest
 	./sorttest 2 8000
 	./sorttest 8001
 sorttest: sorttest.cpp samplesortlib.hpp
-export-sort:
-	rsync -av $(SORTSRCS) $(SORTDEST)
-	cd  $(SORTDEST); git commit -a ; git push
-
