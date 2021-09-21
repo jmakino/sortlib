@@ -23,6 +23,8 @@
 //  taking class T as its argument (2nd form)
 //
 //    Copyright   2021 Jun Makino
+//    Licencse: MIT
+//    https://github.com/jmakino/sortlib/blob/main/LICENSE
 // 
 
 namespace SampleSortLib{
@@ -78,7 +80,7 @@ namespace SampleSortLib{
     }
     
     
-    const int randomize_offset = 48271;    
+    const int randomize_offset = 48271;     // This is a prime number
 
     template<class T, class GetKey>
     void samplesort(T * b,

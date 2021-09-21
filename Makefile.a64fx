@@ -1,12 +1,17 @@
 % : %.cpp
 	$(CC) $(CPPFLAGS) -o $@ $< 
+FDPSDIR = ../fdps/fdps-devel/src
+CFLAGS = -I$(FDPSDIR) 
 #CPPFLAGS =  -g   -fsanitize=address # -fsanitize=leak
 #CPPFLAGS += -fopenmp  -O3 -march=native
 #CPPFLAGS += -ffast-math    -ftree-vectorize  -fopt-info-vec-optimized=vector.txt
 CC = FCCpx -Nclang
 CPPFLAGS = -fopenmp  -Ofast 
-CFLAGS = -Nclang -fopenmp  -Ofast 
+CFLAGS += -Nclang -fopenmp  -Ofast 
 CFLAGS += -Rpass=sve-loop-vectrizable
-mpitest: mpitest.c
-	 mpifccpx $(CFLAGS) -o $@ $<
+mpitest: mpitest.cpp
+	mpiFCCpx $(CFLAGS) -o $@ $<
+mpitest2: mpitest2.cpp
+	mpiFCCpx $(CFLAGS) -o $@ $<
+
 	 
