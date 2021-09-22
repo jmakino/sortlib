@@ -99,7 +99,7 @@ namespace SampleSortLib{
 	auto nt = omp_get_max_threads();
 	//    auto nt = 4;
 	//	if (n < nt*5 || n < 2*nt*nt|| nt==1){
-	if (n < nt*5 || n<1000| nt==1){
+	if (n < nt*5 || n<1000|| nt==1){
 	    //	printf("single thread sort called\n");
 	    // n too small for parallization. Call single-thread sort
 	    std::sort(b,b+n,
