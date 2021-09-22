@@ -116,8 +116,6 @@ namespace SampleSortLib{
 	if (nsample < 2) nsample = 2;
 	auto nsampletotal = nsample * nt;
 	KeyType samplearray[nsampletotal];
-	int mystart[nt];
-	int myend[nt];
 	KeyValuePair key[nt][nwork0];
 	//    printf("nt=%d  nwork=%d nsample=%d \n", nt, nwork0, nsample);
 	int isrcstart[nt][nt+1];
@@ -150,8 +148,6 @@ namespace SampleSortLib{
 #endif	    
 	    //	    printf("it=%d  mystart=%d, myend=%d, myrange=%d\n",
 	    //	   it, mystartlocal, myendlocal,myrange );
-	    mystart[it]=mystartlocal;
-	    myend[it]=myendlocal;
 	    auto myoffset = randomize_offset ;
 	    if (myoffset % myrange == 0 ||myrange % myoffset == 0){
 		myoffset ++;
