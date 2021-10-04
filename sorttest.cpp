@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 	if (ok){
 	    if (showtime){
 		printf("Parallel sort success for n=%d nthreads=%d!\n", n,
-		       omp_get_max_threads());
+		       SAMPLESORTLIB_OMP_GET_MAX_THREADS);
 	    }
 	}else{
 	    printf("Parallel sort failed!\n");

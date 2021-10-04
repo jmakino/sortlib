@@ -25,9 +25,18 @@
 //    Copyright   2021 Jun Makino
 //    Licencse: MIT
 //    https://github.com/jmakino/sortlib/blob/main/LICENSE
-// 
+//
 
+#ifdef _OPENMP
+#define SAMPLESORTLIB_OMP_GET_MAX_THREADS omp_get_max_threads()
+#define SAMPLESORTLIB_OMP_GET_THREAD_NUM omp_get_thread_num()
+#else
+#define SAMPLESORTLIB_OMP_GET_MAX_THREADS 1
+#define SAMPLESORTLIB_OMP_GET_THREAD_NUM 0
+#endif
 namespace SampleSortLib{
+
+    
     
     inline double GetWtime()
     {
@@ -96,7 +105,7 @@ namespace SampleSortLib{
 	};
     
 	showdt("", true);
-	auto nt = omp_get_max_threads();
+	auto nt = SAMPLESORTLIB_OMP_GET_MAX_THREADS;
 	//    auto nt = 4;
 	//	if (n < nt*5 || n < 2*nt*nt|| nt==1){
 	if (n < nt*5 || n<1000|| nt==1){
@@ -124,7 +133,7 @@ namespace SampleSortLib{
 	auto maxdestsize=0;
 #pragma omp parallel
 	{
-	    auto it=omp_get_thread_num();
+	    auto it=SAMPLESORTLIB_OMP_GET_THREAD_NUM;
 	    if (it==0) showdt("Enter parallel region");
 #if 0
 	    auto mystartdest = it*nsample;
@@ -281,7 +290,7 @@ namespace SampleSortLib{
 	//    showdt(" range determination2");
 #pragma omp parallel
 	{
-	    auto it=omp_get_thread_num();
+	    auto it=SAMPLESORTLIB_OMP_GET_THREAD_NUM;
 	    auto mydestsize = destsize[it];
 	    int idest=0;
 	    for(auto itsrc=0; itsrc < nt; itsrc++){
