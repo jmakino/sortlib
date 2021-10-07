@@ -8,7 +8,11 @@ testsort: sorttest
 	echo Test ssamplesort for n=2 to 8000. This will take a while...
 	./sorttest 2 8000
 	./sorttest 8001
+testmap: maptest
+	./maptest 100000 100
 sorttest: sorttest.cpp samplesortlib.hpp
 	g++ $(CPPFLAGS) $(OMPFLAGS) -o sorttest sorttest.cpp
 sorttest.single : sorttest.cpp samplesortlib.hpp
 	g++ $(CPPFLAGS)  -o sorttest.single  sorttest.cpp
+maptest: maptest.cpp  samplesortlib.hpp simplemap.hpp
+	g++ $(CPPFLAGS) $(OMPFLAGS)  -o maptest maptest.cpp

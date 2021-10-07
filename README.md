@@ -1,7 +1,7 @@
 # sortlib
 
 An experimental code for test/improve the performance of parallel
-sort
+sort and parallel map
 
 you can try this with
 
@@ -88,3 +88,68 @@ Sample sort with sorting applied to index-value pairs (locally
 generated). The original array is reordered according to the sorted
 index-value pair. Thus this library is optimized for classes with
 relatively large sizes (more than 32 bytes).
+
+# Map replacement
+
+Experimental library to replace std::map with fast paralell algorithm.
+This library is not intended as general-purpose replacement of map,
+but desgined for a rather specific use case, where we have an array
+of values and want to obtain the indices within array from values.
+
+## Limitations:
+
+* The size of array n should be specified before setting any values
+* One can use values as indices only after all values corresponding to
+  all indices in the specified range are set
+* For parallel index search, one should call makemap member function before
+  use.
+* One makemap is called, or index serch is done, one cannot change the
+  content of map. One can clear the map and set new values.
+* One can use [] operator only for assignment and not for
+  reference. For reference, use at() instead.
+  
+## Supported functions and API
+
+```
+namespace SimpleMapLib{
+    template <typename KeyT, typename ValT>
+    class Map{
+        //std::map like APIs
+	Map();
+	void clear();
+	KeyValuePair* find(KeyT k);
+	ValT at(KeyT k){return find(k)->second;}
+	KeyAddressPair  operator [](KeyT  k);
+	KeyValuePair* end();
+        //additional APIs
+	Map(ValT s);
+        void resize(ValT s);
+	void makemap();
+    };
+}
+```
+One can create a map by, for example,
+```
+    SimpleMapLib::Map<int64_t, int> m;
+```
+In this case, one first set the number of element by
+```
+    m.resize(n);
+```
+after this, one can set values by
+```
+m[key]=index
+```
+but ALL indices of the range [0,n) must be set before the map m is
+used to get index from key, and after all indices are set, makemap
+function should be called. The setting of values can be done in
+parallel, using for example OpenMP parallel for.
+
+To get index from key. one can use at(), but not []. One can also use
+find() and first/second members.
+
+
+
+    
+
+
