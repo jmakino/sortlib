@@ -41,19 +41,12 @@ namespace SimpleMapLib{
 	int32_t size;
 	int32_t memsize;
 	KeyValuePair * p;
-	KeyAddressPair *passignbuf;
 	bool sorted;
 	void initialize(ValT s){
 	    if (s>0){
 		p = new KeyValuePair[s+slack];
 		size=s;
 		memsize = s+slack;
-#ifdef _OPENMP
-		passignbuf = new KeyAddressPair[omp_get_max_threads()];
-#else
-		passignbuf = new KeyAddressPair[1];
-#endif		
-		
 	    }else{
 		p= NULL;
 		size=0;
@@ -99,7 +92,7 @@ namespace SimpleMapLib{
 	}
 	void set(KeyT  k, ValT v)
 	{
-#ifdef SIMPLEMAP_RANGE_CHECKE	    
+#ifdef SIMPLEMAP_RANGE_CHECK	    
 	    if (v >= size){
 		printf("simplemap::set failed, too large index:%d size:%d %d\n",
 		       v, size, memsize);
