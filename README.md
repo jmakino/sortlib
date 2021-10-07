@@ -96,6 +96,14 @@ This library is not intended as general-purpose replacement of map,
 but desgined for a rather specific use case, where we have an array
 of values and want to obtain the indices within array from values.
 
+
+## Usage as header-only library
+
+```
+   #include "PATH/OF/THIS/FILE/samplesortlib.hpp"
+   #include "PATH/OF/THIS/FILE/simplemap.hpp"
+```
+
 ## Limitations:
 
 * The size of array n should be specified before setting any values
@@ -118,7 +126,7 @@ namespace SimpleMapLib{
 	Map();
 	void clear();
 	KeyValuePair* find(KeyT k);
-	ValT at(KeyT k){return find(k)->second;}
+	ValT at(KeyT k);
 	KeyAddressPair  operator [](KeyT  k);
 	KeyValuePair* end();
         //additional APIs
@@ -148,6 +156,9 @@ parallel, using for example OpenMP parallel for.
 To get index from key. one can use at(), but not []. One can also use
 find() and first/second members.
 
+The type of return values of functions find() and end() is a pointer
+to SimpleMapLib::KeyAddressPair, a class, which can be used in place
+of iterator.
 
 
     
