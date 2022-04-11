@@ -71,7 +71,8 @@ uint64_t get_hi_key();
 uint64_t get_lo_key();
 ```
 (see example in sorttest128.cpp). SIMD version requires either
--DAVX512 or -DSVE specified. 
+-DAVX512 or -DSVE specified. Speedup might be marginal with AVX512 but
+reasonable with SVE (not large, though, around 20-30%)
 
 
 ## Limitations
