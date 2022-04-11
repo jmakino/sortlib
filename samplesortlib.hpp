@@ -87,8 +87,83 @@ namespace SampleSortLib{
     {
 	return getkey(a)<getkey(b);
     }
+
+    template <typename T>
+    class Has_get_hi_key
+    {
+	typedef char one;
+	typedef long two;
+	template <typename C> static one test( decltype(&C::get_hi_key) ) ;
+	template <typename C> static two test(...);
+    public:
+	enum { value = sizeof(test<T>(0)) == sizeof(char) };
+    };
     
-    
+    template<class T, class GetKey>
+    void simd_sort_if_possible(T* b, int n, GetKey getkey,
+			       bool indexonly=false)
+    {
+	constexpr bool  simd_possible = Has_get_hi_key<decltype(getkey(*b))>::value;
+	if constexpr (simd_possible)
+		     //if constexpr (0)
+	    {
+		//fprintf(stderr, "SIMD sort called\n"); 
+		uint64_t hi[n];
+		uint64_t lo[n];
+		uint64_t index[n];
+		for (auto i=0;i<n;i++){
+		    hi[i]=b[i].value.get_hi_key();
+		    lo[i]=b[i].value.get_lo_key();
+		    index[i]=b[i].key;
+		    //  fprintf(stderr, "%d %lu %lu %lu\n",
+		    //	    i, hi[i], lo[i], index[i]);
+		    
+		}
+		//fprintf(stderr, "before sort\n");
+		SIMDSortLib::simd_sort(hi, lo, index, n);
+		//fprintf(stderr, "after sort\n");
+		if (!indexonly){
+		    for (auto i=0;i<n;i++){
+			b[i].value.set_hi_key(hi[i]);
+			b[i].value.set_lo_key(lo[i]);
+			b[i].key=index[i];
+			//  fprintf(stderr, "%d %lu %lu %lu\n",
+			//	    i, hi[i], lo[i], index[i]);
+		    }
+		}else{
+		    for (auto i=0;i<n;i++){
+			b[i].key=index[i];
+		    }
+	        }
+	    }else{
+	    sort_bodies(b, n);
+	}		
+    }
+
+#ifdef SVE    
+
+    template<class T>
+    inline void copy(T* dest, T* src)
+    {
+	constexpr int nsize = sizeof(T);
+	auto s = (int8_t*) src;
+	auto d = (int8_t*) dest;
+	int nsve = svcntb();
+	for(int i=0; i<nsize; i+= nsve){
+	    svbool_t pmask= svwhilelt_b8(i,nsize);
+	    svst1(pmask, d+i, svld1(pmask, s+i));
+	}
+	    
+	    
+    }
+#else
+    template<class T>
+    inline void copy(T* dest, T* src)
+    {
+	*dest = *src;
+    }
+#endif    
+	
     const int randomize_offset = 48271;     // This is a prime number
 
     template<class T, class GetKey>
@@ -178,7 +253,10 @@ namespace SampleSortLib{
 	    }
 	    //	sort_bodies(b+mystartlocal, myrange);
 	    if (it==0) showdt("Key made");
-	    sort_bodies(key[it], myrange);
+	    simd_sort_if_possible(key[it], myrange,
+				  [](KeyValuePair& l)
+				  ->auto{return l.value;});
+	    //    sort_bodies(key[it], myrange);
 	    if (it==0) showdt("Initial sort end");
 	    //	printf("sort end %d\n", it);
 	    if (it==0){
@@ -303,23 +381,78 @@ namespace SampleSortLib{
 		}
 	    }
 	    //	printf("sort size=%d %d\n", mydestsize,it);
-	    sort_bodies(localcopy[it], mydestsize);
+	    //sort_bodies(localcopy[it], mydestsize);
+	    simd_sort_if_possible(localcopy[it], mydestsize,
+	    			   [](KeyValuePair& l)
+				  ->auto{return l.value;}, true);
 	    //	printf("sort end %d\n", it);
 
 	    if (it==0)showdt(" 2nd sort");
 	    mydestsize = destsize[it];
 	    auto offset = deststart[it];
+#ifdef SVE
+	    	svbool_t ptrue =svptrue_b64();
+#endif
 	    for(auto idest=0; idest < mydestsize; idest++){
 		bodylocalcopy[it][idest]=b[localcopy[it][idest].key];
+		//copy(&(bodylocalcopy[it][idest]),
+		//   b+localcopy[it][idest].key);
+		
+#ifdef SVE // improves performance of this part by 60% or more
+		double * p = (double*) (b+localcopy[it][idest+16].key);
+		svprfd(ptrue, p, SV_PLDL1STRM);
+		if constexpr (sizeof(T) > 64){
+			svprfd(ptrue, p+8, SV_PLDL1STRM);
+		    }
+		
+		if constexpr (sizeof(T) > 128){
+			svprfd(ptrue, p+16, SV_PLDL1STRM);
+		    }
+		if constexpr (sizeof(T) > 192){
+			svprfd(ptrue, p+24, SV_PLDL1STRM);
+		    }
+		if constexpr (sizeof(T) > 256){
+			svprfd(ptrue, p+32, SV_PLDL1STRM);
+		    }
+		if constexpr (sizeof(T) > 320){
+			svprfd(ptrue, p+40, SV_PLDL1STRM);
+		    }
+		if constexpr (sizeof(T) > 384){
+			svprfd(ptrue, p+48, SV_PLDL1STRM);
+		    }
+		if constexpr (sizeof(T) > 448){
+			svprfd(ptrue, p+56, SV_PLDL1STRM);
+		    }
+#endif		
+		
 	    }
 	    if (it==0)    showdt(" Copyforward");
 #pragma omp barrier	
 	    //	auto mydestsize = destsize[it];
 	    offset = deststart[it];
+#ifndef SVE	    
 	    for(auto idest=0; idest < mydestsize; idest++){
 		//	    printf("it, idest, offst=%d %d %d\n", it, idest, offset);
 		b[offset+idest] = bodylocalcopy[it][idest];
 	    }
+#else
+	    int nsize = sizeof(T) * mydestsize;
+	    auto d = (int8_t*) (b+offset);
+	    auto s = (int8_t*) bodylocalcopy[it];
+	    int nsve = svcntb();
+#pragma fj zfill
+#pragma fj unroll(8)
+#pragma fj loop prefetch_sequential	    
+	    for(int i=0; i<nsize; i+= nsve){
+		svbool_t pmask= svwhilelt_b8(i,nsize);
+		svst1(pmask, d+i, svld1(pmask, s+i));
+	    }
+	    
+	    //	    for(auto idest=0; idest < mydestsize; idest++){
+		//	    printf("it, idest, offst=%d %d %d\n", it, idest, offset);
+	    //	b[offset+idest] = bodylocalcopy[it][idest];
+	    //	    }
+#endif	    
 	}
 	showdt(" Copyback");
     }

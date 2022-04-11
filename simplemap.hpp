@@ -132,6 +132,7 @@ namespace SimpleMapLib{
 
 	}
 	ValT value(KeyT k){return find(k)->second;}
+	ValT second(KeyT k){return find(k)->second;}
 	ValT at(KeyT k){return find(k)->second;}
 	KeyValuePair* end(){return p+size;}
 

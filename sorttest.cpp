@@ -13,6 +13,8 @@
 #include<omp.h>
 #include<stdlib.h>
 
+#include "simdsort.hpp"
+
 #include "samplesortlib.hpp"
 
 

@@ -16,3 +16,9 @@ sorttest.single : sorttest.cpp samplesortlib.hpp
 	g++ $(CPPFLAGS)  -o sorttest.single  sorttest.cpp
 maptest: maptest.cpp  samplesortlib.hpp simplemap.hpp
 	g++ $(CPPFLAGS) $(OMPFLAGS)  -o maptest maptest.cpp
+sorttest128.a64fx : sorttest128.cpp samplesortlib.hpp
+	FCC    -g -fopenmp -DSVE -Nclang  -Ofast -mcpu=a64fx+sve -DSORTLIB_MEASURE_TIME  -o sorttest128.a64fx  sorttest128.cpp 
+sorttest.a64fx : sorttest.cpp samplesortlib.hpp
+	FCC    -g -fopenmp -DSVE -Nclang  -Ofast -mcpu=a64fx+sve -DSORTLIB_MEASURE_TIME -I ../simdsort -o sorttest.a64fx  sorttest.cpp 
+sorttest128: sorttest128.cpp samplesortlib.hpp
+	g++  -std=c++1z $(CPPFLAGS) -DSORTLIB_MEASURE_TIME -DAVX512  -I  -o sorttest128  sorttest128.cpp 
