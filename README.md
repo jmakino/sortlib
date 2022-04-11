@@ -29,9 +29,11 @@ This result is ontained  on Intel® Core™ i7-1065G7 with gcc version
 ## Usage as header-only library
 
 ```
-   #include "PATH/OF/THIS/FILE/samplesortlib.hpp"
+   #include "simdsortlib.hpp"
+   #include "samplesortlib.hpp"
 ```
 
+with appropriate -I option
 
 Provide:
 ```
@@ -58,6 +60,19 @@ using the member variable x as key, we write
 ```
 
 The old name samplesort_bodies is kept for compatibility.
+
+Samplesort uses std::sort as the core sorter for single-core sort. It
+is also possible to use SIMDsort  AVX512 or SVE
+(https://github.com/jmakino/simdsort), if the GetKey type is
+effectively an 128-bit unsigned integer type and support two member
+functions:
+```
+uint64_t get_hi_key();
+uint64_t get_lo_key();
+```
+(see example in sorttest128.cpp). SIMD version requires either
+-DAVX512 or -DSVE specified. 
+
 
 ## Limitations
 
