@@ -21,4 +21,4 @@ sorttest128.a64fx : sorttest128.cpp samplesortlib.hpp
 sorttest.a64fx : sorttest.cpp samplesortlib.hpp
 	FCC    -g -fopenmp -DSVE -Nclang  -Ofast -mcpu=a64fx+sve -DSORTLIB_MEASURE_TIME -I ../simdsort -o sorttest.a64fx  sorttest.cpp 
 sorttest128: sorttest128.cpp samplesortlib.hpp
-	g++  -std=c++1z $(CPPFLAGS) -DSORTLIB_MEASURE_TIME -DAVX512  -I  -o sorttest128  sorttest128.cpp 
+	g++  -std=c++1z $(CPPFLAGS) -DSORTLIB_MEASURE_TIME -DAVX512   -o sorttest128  sorttest128.cpp 
