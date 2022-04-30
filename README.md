@@ -61,7 +61,7 @@ using the member variable x as key, we write
 
 The old name samplesort_bodies is kept for compatibility.
 
-Samplesort uses std::sort as the core sorter for single-core sort. It
+Samplesort uses std::sort as the core sorter for single-core, in-cache sort. It
 is also possible to use SIMDsort  AVX512 or SVE
 (https://github.com/jmakino/simdsort), if the GetKey type is
 effectively an 128-bit unsigned integer type and support two member
@@ -79,7 +79,7 @@ reasonable with SVE (not large, though, around 20-30%)
 
 
 Assumes that the stack size is large enough to place working arrays
-(n*(sizeof(T)+32) bytes). Use ulimit -h (or limit stacksize in Csh),
+(n*(sizeof(T)+32) bytes). Use ulimit -s (or limit stacksize in Csh),
 or modify the code so that it uses new/delete or other memory
 management schemes.
 
@@ -176,6 +176,14 @@ The type of return values of functions find() and end() is a pointer
 to SimpleMapLib::KeyAddressPair, a class, which can be used in place
 of iterator.
 
+
+## Changelog
+
+### Apr 30 2022
+
+* Fast (on some machines) multipartion algorithm used for initial
+  division
+* Sample sort is also used for single-thread sort. 
 
     
 

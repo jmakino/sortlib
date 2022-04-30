@@ -12,10 +12,10 @@
 #include<random>
 #include<omp.h>
 #include<stdlib.h>
+//#define USELOCALSAMPLESORT	    
 
 #include "simdsort.hpp"
 #include "samplesortlib.hpp"
-
 class myuint128{
 public:
     uint64_t hi;
@@ -33,6 +33,19 @@ bool operator<(myuint128 a, myuint128 b)
     }else{
 	return false;
     }
+}
+
+bool operator==(myuint128 a, myuint128 b)
+{
+    if (a.hi ==b.hi && (a.get_lo_key() ==b.get_lo_key())){
+	return true;
+    }else{
+	return false;
+    }
+}
+bool operator!=(myuint128 a, myuint128 b)
+{
+    return ! (a==b);
 }
 
 
@@ -87,7 +100,7 @@ int main(int argc, char** argv)
     // 一様実数分布
     // [-1.0, 1.0)の値の範囲で、等確率に実数を生成する
     std::uniform_real_distribution<> dist1(-1.0, 1.0);
-    std::uniform_int_distribution<uint64_t> dist2(0,199999999);
+    std::uniform_int_distribution<uint64_t> dist2(0,1L<<62);
     auto nstart= atoi(argv[1]);
     auto nend =nstart+1;
     if (argc > 2) nend= atoi(argv[2]);
@@ -102,8 +115,6 @@ int main(int argc, char** argv)
     
     auto bodies = new Body[nend];
     auto b2 = new Body[nend];
-    auto b3 = new Body[nend];
-    auto b4 = new Body[nend];
     for (auto n=nstart; n<nend; n++){
 	//	printf("n=%d nt=%d\n", n, omp_get_max_threads());
 	for (auto i=0; i<n; i++){
@@ -118,30 +129,27 @@ int main(int argc, char** argv)
 	// }
 	for (auto i=0; i<n; i++){
 	    b2[i]=bodies[i];
-	    b3[i]=bodies[i];
-	    b4[i]=bodies[i];
 	}
 	auto t0=SampleSortLib::GetWtime();
 	SampleSortLib::sort_bodies(bodies, n);
 	auto t1=SampleSortLib::GetWtime();
 	double dummy;
-	SampleSortLib::samplesort_bodies(b2, n,
-					 [](Body & l)
+	SampleSortLib::samplesort(b2, n, [](Body & l)
 					 ->auto{return l.key;});
 	auto t2=SampleSortLib::GetWtime();
-	SampleSortLib::samplesort_bodies(b3, n);
-	auto t3=SampleSortLib::GetWtime();
-	if (showtime) printf("Time to sort = %g %g %g\n", t1-t0, t2-t1, t3-t2);
+	if (showtime) printf("Time to sort = %g %g\n", t1-t0, t2-t1);
 	bool ok=true;
 	//for (auto i=0; i<n; i++){
 	//  printf("%d  %ld %ld %ld \n",i,  bodies[i].id,b2[i].id, b3[i].id);
 	//}
 	    
 	for (auto i=0; i<n; i++){
-	    if (bodies[i].id != b2[i].id ||
-		bodies[i].id != b3[i].id   ){
+	    if (bodies[i].key != b2[i].key   ){
 		ok=false;
-		printf("ERROR at:%d  %ld %ld %ld \n",i,  bodies[i].id,b2[i].id, b3[i].id);
+		printf("ERROR at:%d  %ld %ld \n",i,  bodies[i].id,b2[i].id);
+		printf(" %ld %ld %ld %ld \n",i,  bodies[i].key.hi,
+		       bodies[i].key.lo, b2[i].key.hi, b2[i].key.lo);
+		       
 		exit(-1);
 	    }
 	}
