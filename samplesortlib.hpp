@@ -658,6 +658,32 @@ namespace SampleSortLib{
 			svprfd(ptrue, p+56, SV_PLDL1STRM);
 		    }
 #endif		
+#ifdef AVX512
+		double * p = (double*) (b+localcopy[it][idest+16].key);
+		_mm_prefetch((char*)p, _MM_HINT_T0);
+		if constexpr (sizeof(T) > 64){
+			_mm_prefetch((char*)(p+8), _MM_HINT_T0);
+		    }
+
+		if constexpr (sizeof(T) > 128){
+			_mm_prefetch((char*)(p+16), _MM_HINT_T0);
+		    }
+		if constexpr (sizeof(T) > 192){
+			_mm_prefetch((char*)(p+24), _MM_HINT_T0);
+		    }
+		if constexpr (sizeof(T) > 256){
+			_mm_prefetch((char*)(p+32), _MM_HINT_T0);
+		    }
+		if constexpr (sizeof(T) > 320){
+			_mm_prefetch((char*)(p+40), _MM_HINT_T0);
+		    }
+		if constexpr (sizeof(T) > 384){
+			_mm_prefetch((char*)(p+48), _MM_HINT_T0);
+		    }
+		if constexpr (sizeof(T) > 448){
+			_mm_prefetch((char*)(p+56), _MM_HINT_T0);
+		    }
+#endif		
 
 	    }
 	    if (it==0)    showdt(" Copyforward");
