@@ -98,6 +98,24 @@ open triangles, squares and pentagons are the results of
 samplesort_bodies called with 2, 4,  12,
 24, 48 threads.
 
+### Comparison with GCC parallel STL
+
+samplesortcpp17.cpp compares the time for std::sort,
+SampleSortLib::samplesort and __gnu_parallel::sort. Example
+performance(measured with env OMP_NUM_THREADS=16 sorttestcpp17 100000
+100004 1 and other runs with different N)
+
+CPU: Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
+OS: Cent 7
+Compiler: gcc 11.2.1
+
+100K:0.0117821 0.00246628 0.00178517
+1M: 0.224061 0.0275078 0.0223829
+10M: 2.89478 0.287627 0.487174
+
+
+
+
 ## Algorithm
 
 Sample sort with sorting applied to index-value pairs (locally
@@ -178,6 +196,16 @@ of iterator.
 
 
 ## Changelog
+
+### May 4  2022
+
+* Comparison with __gnu_parallel::sort added
+ (sorttestcpp17.cpp). Second number gives the sample sort performance
+ and the third gun parallel sort. Our sort seems to be faster for
+ large N (100K or larger)
+
+
+    
 
 ### Apr 30 2022
 
