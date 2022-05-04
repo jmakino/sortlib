@@ -690,12 +690,37 @@ namespace SampleSortLib{
 #pragma omp barrier	
 	    //	auto mydestsize = destsize[it];
 	    offset = deststart[it];
-#ifndef SVE	    
+#ifndef SVE
+#ifndef AVX512
 	    for(auto idest=0; idest < mydestsize; idest++){
 		//	    printf("it, idest, offst=%d %d %d\n", it, idest, offset);
 		b[offset+idest] = bodylocalcopy[it][idest];
 	    }
-#else
+#else //AVX512
+	    int nsize = sizeof(T) * mydestsize;
+	    auto d = (int8_t*) (b+offset);
+	    auto s = (int8_t*) bodylocalcopy[it];
+	    int64_t doffset  = ((int64_t) d) & 63;
+	    if (doffset){
+		doffset = 64 - doffset;
+		memcpy(d, s, doffset);
+		d+= doffset;
+		s+= doffset;
+		nsize-=doffset;
+	    }
+		
+	    
+	    int nsve = 64;
+	    auto nlimit = (nsize/nsve)*nsve;
+	    //fprintf(stderr, "offset, remain = %ld %d\n", doffset, nsize-nlimit);
+	    for(int i=0; i<nlimit; i+= nsve){
+		_mm512_stream_pd((double*)(d+i), _mm512_loadu_pd((double*)(s+i)));
+	    }
+	    memcpy(d+nlimit, s+nlimit, nsize-nlimit);
+
+	    
+#endif	    
+#else //SVE
 	    int nsize = sizeof(T) * mydestsize;
 	    auto d = (int8_t*) (b+offset);
 	    auto s = (int8_t*) bodylocalcopy[it];

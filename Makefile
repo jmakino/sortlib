@@ -12,6 +12,8 @@ testmap: maptest
 	./maptest 100000 100
 sorttest: sorttest.cpp samplesortlib.hpp
 	g++ $(CPPFLAGS) $(OMPFLAGS)  -DAVX512 -o sorttest sorttest.cpp
+sorttestcpp17: sorttestcpp17.cpp samplesortlib.hpp
+	g++ $(CPPFLAGS) $(OMPFLAGS)  -DAVX512 -o sorttestcpp17 sorttestcpp17.cpp
 sorttest.single : sorttest.cpp samplesortlib.hpp
 	g++ $(CPPFLAGS)  -o sorttest.single  sorttest.cpp
 maptest: maptest.cpp  samplesortlib.hpp simplemap.hpp

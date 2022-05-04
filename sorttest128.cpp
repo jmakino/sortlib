@@ -61,11 +61,13 @@ public:
     int64_t id;
     myuint128 key;
     double pos[3];
+#ifndef MINIMALSTRUCT    
     double vel[3];
     double acc[3];
     double accold[3];
     double pos2[3];
     double vel2[3];
+#endif    
     double phi;
     inline auto getsortkey() {return key;}
     

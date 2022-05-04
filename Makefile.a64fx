@@ -5,7 +5,7 @@ CFLAGS = -I$(FDPSDIR)
 #CPPFLAGS =  -g   -fsanitize=address # -fsanitize=leak
 #CPPFLAGS += -fopenmp  -O3 -march=native
 #CPPFLAGS += -ffast-math    -ftree-vectorize  -fopt-info-vec-optimized=vector.txt
-CC = FCCpx -Nclang
+CC = FCC -Nclang -I ../simdsort -DSVE
 CPPFLAGS = -fopenmp  -Ofast 
 CFLAGS += -Nclang -fopenmp  -Ofast 
 CFLAGS += -Rpass=sve-loop-vectrizable
@@ -15,3 +15,9 @@ mpitest2: mpitest2.cpp
 	mpiFCCpx $(CFLAGS) -o $@ $<
 
 	 
+sorttest128: sorttest128.cpp samplesortlib.hpp
+	$(CC)  $(CPPFLAGS) -DSORTLIB_MEASURE_TIME  -I ../simdsort -o sorttest128  sorttest128.cpp 
+sorttest128minimal: sorttest128.cpp samplesortlib.hpp
+	$(CC)  $(CPPFLAGS)  -DMINIMALSTRUCT -DSORTLIB_MEASURE_TIME  -I ../simdsort -o sorttest128minimal  sorttest128.cpp 
+sorttest: sorttest.cpp samplesortlib.hpp
+	$(CC)  $(CPPFLAGS) -DSORTLIB_MEASURE_TIME  -I ../simdsort -o sorttest  sorttest.cpp 
