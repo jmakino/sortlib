@@ -102,11 +102,16 @@ int main(int argc, char** argv)
 	//				     [](Body & l)
 	//				     ->auto{return l.pos[0];} );
 	auto t3=SampleSortLib::GetWtime();
+	for (auto i=0; i<n; i++){
+	    b4[i]=b3[i];
+	}
+	SampleSortLib::samplesort_bodies(b4, n);
 	if (showtime) printf("Time to sort = %g %g %g\n", t1-t0, t2-t1, t3-t2);
 	bool ok=true;
 	for (auto i=0; i<n; i++){
 	    if (bodies[i].id != b2[i].id ||
-		bodies[i].id != b3[i].id   ){
+		bodies[i].id != b3[i].id ||
+		bodies[i].id != b4[i].id   ){
 		ok=false;
 		printf("ERROR at:%d  %ld %ldg\n",i,  bodies[i].id, b3[i].id);
 		exit(-1);

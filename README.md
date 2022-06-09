@@ -105,6 +105,7 @@ SampleSortLib::samplesort and __gnu_parallel::sort. Example
 performance(measured with env OMP_NUM_THREADS=16 sorttestcpp17 100000
 100004 1 and other runs with different N)
 
+
 CPU: Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 OS: Cent 7
 Compiler: gcc 11.2.1
@@ -113,6 +114,8 @@ Compiler: gcc 11.2.1
 1M: 0.224061 0.0275078 0.0223829
 10M: 2.89478 0.287627 0.487174
 
+For small N (1M or less), our samplesort is up to 30% slower than GCC
+parallel sort, but is up to 2X faster for very large N.
 
 
 
@@ -196,6 +199,10 @@ of iterator.
 
 
 ## Changelog
+
+### June 9  2022
+
+* Bug fix. Incorrect behaviour for initially sorted array fixed.
 
 ### May 4  2022
 

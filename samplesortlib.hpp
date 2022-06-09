@@ -28,6 +28,8 @@
 //    https://github.com/jmakino/sortlib/blob/main/LICENSE
 //
 
+#include "simdsort.hpp"
+
 #define USELOCALSAMPLESORT 1
 #ifdef _OPENMP
 #define SAMPLESORTLIB_OMP_GET_MAX_THREADS omp_get_max_threads()
@@ -254,6 +256,57 @@ namespace SampleSortLib{
     const int randomize_offset = 48271;     // This is a prime number
 
     void setblocksize(int n){blocksize=n;}
+
+    template<class T>
+    void adjust_partition(int n,
+			  int nprocessed,
+			  int ioverflown,
+			  int nblocks,
+			  int * size,
+			  T** bdest,
+			  int * ndestlimit)
+    {
+	int bufftotalsize=0;
+	for(auto i=0;i<nblocks; i++)bufftotalsize += ndestlimit[i];
+	auto nremain = bufftotalsize - nprocessed;
+	auto nothers = nremain/2/(nblocks - 1);
+	auto noverflown = nremain - nothers*(nblocks-1);
+	T copybuff[nprocessed];
+	auto icopy=0;
+
+	// fprintf(stderr, "adjust partiton nremain=%d nothers=%d nover=%d\n",
+	// 	nremain, nothers, noverflown);
+	// for(auto i=0;i<nblocks; i++){
+	//     fprintf(stderr, "i=%d  %d %d\n", i, size[i], ndestlimit[i]);
+	// }
+	
+	for(auto i=0;i<nblocks; i++){
+	    for(auto j=0;j<size[i];j++){
+		copybuff[icopy+j] = bdest[i][j];
+	    }
+	    icopy += size[i];
+	}
+	int newbdestindex = 0;
+	for(auto i=0;i<nblocks;i++){
+	    auto ninc = nothers;
+	    if (i==ioverflown) ninc = noverflown;
+	    ndestlimit[i]=size[i]+ninc;
+	    newbdestindex += ndestlimit[i];
+	    if (i< nblocks - 1){
+		bdest[i+1] = bdest[0] + newbdestindex;
+	    }
+	}
+	icopy=0;
+	for(auto i=0;i<nblocks; i++){
+	    for(auto j=0;j<size[i];j++){
+		bdest[i][j] = copybuff[icopy+j];
+	    }
+	    icopy += size[i];
+	}
+	
+	
+    }	
+	
     
     template<class T, class ValueType>
     bool multipartition(T * b,
@@ -268,6 +321,10 @@ namespace SampleSortLib{
 	if (nblocks < 2){
 	    fprintf(stderr, "something broken: n, nb= %d %d\n", n, nblocks);
 	}
+	int ndestlimit[nblocks];
+	for(auto i=0;i<nblocks; i++) ndestlimit[i] = ndestmax;
+	// assumption: initially, bdest[i] point to
+	//  bdest[0] + i*ndestmax 
 	ValueType * pp = partition;
 	ValueType treepartition[nparts];
 	int nlevel = 0;
@@ -280,10 +337,12 @@ namespace SampleSortLib{
 	    auto  loc = find_partition(b[i].value, treepartition, nparts, nlevel);
 	    bdist[loc][size[loc]]=b[i];
 	    size[loc]++;
-	    if (size[loc]>= ndestmax) return false;
+	    if (size[loc]>= ndestlimit[loc]) {
+		adjust_partition(n, i+1, loc,  nblocks, size, bdist, ndestlimit);
+	    }
 	}
 	for(int i=0;i<nblocks; i++){
-	    if (size[i]> ndestmax) return false;
+	    if (size[i]> ndestlimit[i]) return false;
 	}
 	return true;
     }
@@ -504,8 +563,11 @@ namespace SampleSortLib{
 	if (destarraysize > n) destarraysize = n;
 	KeyValuePair localcopy[nt][destarraysize];
 	T bodylocalcopy[nt][destarraysize];
+
 	int ndest = (nwork0/nt*2 + sqrt(nwork0)*4+100)*(1<<itry);
 	if (ndest > nwork0) ndest = nwork0;
+	//int ndest = nwork0;
+	
 	KeyValuePair keyparted[nt][nt][ndest];
 	int sizeparted[nt][nt];
 	auto nparts = nt-1;
@@ -514,6 +576,7 @@ namespace SampleSortLib{
 	KeyType treepartition[nparts];
 	bool partition_succeeded[nt];
 	bool partition_succeeded_global=true;
+	KeyValuePair * bdest[nt][nt];
 #pragma omp parallel
 	{
 	    auto it=SAMPLESORTLIB_OMP_GET_THREAD_NUM;
@@ -567,13 +630,13 @@ namespace SampleSortLib{
 		localcopy[it][i].value =getkey(b[i+mystartlocal]);
 	    }
 #pragma omp barrier
-	    KeyValuePair * bdest[nt];
 	    for(auto itdest=0; itdest < nt; itdest++){
-		bdest[itdest]=keyparted[it][itdest];
+		bdest[it][itdest]=keyparted[it][itdest];
 	    }
 	    partition_succeeded[it]==  multipartition(localcopy[it],
 						      myrange, nt, partition,
-						      sizeparted[it], bdest, ndest);
+						      sizeparted[it], bdest[it],
+						      ndest);
 	    
 	    if (it==0)showdt(" partition");
 	    destsize[it]=0;
@@ -593,7 +656,7 @@ namespace SampleSortLib{
 	    int idest=0;
 	    for(auto itsrc=0; itsrc < nt; itsrc++){
 		for (auto isrc=0; isrc < sizeparted[itsrc][it]; isrc++){
-		    localcopy[it][idest] = keyparted[itsrc][it][isrc];
+		    localcopy[it][idest] = bdest[itsrc][it][isrc];
 		    idest++;
 		}
 	    }
