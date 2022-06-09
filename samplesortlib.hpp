@@ -633,7 +633,7 @@ namespace SampleSortLib{
 	    for(auto itdest=0; itdest < nt; itdest++){
 		bdest[it][itdest]=keyparted[it][itdest];
 	    }
-	    partition_succeeded[it]==  multipartition(localcopy[it],
+	    partition_succeeded[it]=  multipartition(localcopy[it],
 						      myrange, nt, partition,
 						      sizeparted[it], bdest[it],
 						      ndest);
